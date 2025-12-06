@@ -8,9 +8,10 @@
 //Requires the use of Time Range in Copernicus Browser
 //Can be used with S2 Quarterly Mosaics
 
-//begin and end dates
-//order doesn't matter; output will be ordered descending
-var allowedDates = ["2025-07-01", "2024-07-01"]; 
+//Begin and end dates
+//Order doesn't matter; output will be ordered descending
+//Dates must exist for the given product for the range set in Copernicus Browser
+var allowedDates = ["2025-01-01", "2024-01-01"]; 
 
 function setup() {
 	return {
