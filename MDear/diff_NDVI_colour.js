@@ -4,6 +4,11 @@
 //Apply colour to output
 //Apply water mask for most recent date
 
+//Michael Dear, Nov-Dec 2025
+
+//Based on diff_NDVI, "Webinar - An Introduction to Working with Custom Scripts with the Sentinel Hub APIs in CDSE", 2025-10-04
+//https://youtu.be/7mkEVukGQ4o?si=VFfz4l_sjJYlSaxL
+
 //NOTES:
 //Requires the use of Time Range in Copernicus Browser
 //Can be used with S2 Quarterly Mosaics
