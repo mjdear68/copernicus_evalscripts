@@ -2,7 +2,7 @@
 
 //Calculate the NDVI difference between two dates
 //Apply colour to output
-//Apply water mask for most recent date
+//Apply masks for pixels that were water or bare ground during both periods
 
 //Michael Dear, Nov-Dec 2025
 
