@@ -50,9 +50,7 @@ function calcNDWI(sample) {
 
 function evaluatePixel(samples){
 	//calculate and return dNDVI
-	var ndvi_0 = calcNDVI(samples[0])
-	var ndvi_1 = calcNDVI(samples[1])
-	var ndvi_diff = ndvi_0 - ndvi_1 //dates sorted descending
+	var ndvi_diff = calcNDVI(samples[0]) - calcNDVI(samples[1]) //dates sorted descending
 	
 	//water mask with NDWI
 	//let NDWI = (samples[0].B03 - samples[0].B08) / (samples[0].B03 + samples[0].B08);
@@ -60,7 +58,7 @@ function evaluatePixel(samples){
 	if (calcNDWI(samples[0])>0.2 && calcNDWI(samples[1])>0.2){//Water mask pixels that were water during both periods
 		return [0,0,1]
 		}
-	else if (ndvi_1 >= 0.2){//Everything that was vegetation at the start
+	else if (calcNDVI(samples[1]) >= 0.2){//Everything that was vegetation at the start
 		return valueInterpolate(ndvi_diff,
 							[-0.5, -0.2, 0, 0.2, 0.5], //thresholds; positive difference is greener
 							//colour ramp - one for each threshold
@@ -72,7 +70,7 @@ function evaluatePixel(samples){
 							[0, 1, 0]
 							]);
 		}
-	else{//This was not vegetation at the start
+	else{//This was not vegetation during either period
 		return [0,0,0];
 	}
 }
