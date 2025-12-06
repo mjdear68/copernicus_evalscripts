@@ -48,29 +48,24 @@ function calcNDWI(sample) {
 	return NDWI
 };
 
-function evaluatePixel(samples){
-	//calculate and return dNDVI
-	var ndvi_diff = calcNDVI(samples[0]) - calcNDVI(samples[1]) //dates sorted descending
-	
-	//water mask with NDWI
-	//let NDWI = (samples[0].B03 - samples[0].B08) / (samples[0].B03 + samples[0].B08);
-
-	if (calcNDWI(samples[0])>0.2 && calcNDWI(samples[1])>0.2){//Water mask pixels that were water during both periods
+function evaluatePixel(samples){	
+	if (calcNDWI(samples[0])>0.2 && calcNDWI(samples[1])>0.2){//Mask pixels that were water during both periods
 		return [0,0,1]
 		}
-	else if (calcNDVI(samples[1]) >= 0.2){//Everything that was vegetation at the start
-		return valueInterpolate(ndvi_diff,
-							[-0.5, -0.2, 0, 0.2, 0.5], //thresholds; positive difference is greener
-							//colour ramp - one for each threshold
-							[
-							[1, 0, 0],
-							[0.5, 0, 0],
-							[0.5, 0.5, 0.5],
-							[0, 0.5, 0],
-							[0, 1, 0]
-							]);
-		}
-	else{//This was not vegetation during either period
-		return [0,0,0];
+	else if (calcNDVI(samples[0]) < 0.2 && calcNDVI(samples[1]) < 0.2){//Mask pixels that were non-vegetation during both periods
+		return [0,0,0];	
 	}
+	else{
+		return valueInterpolate(
+					calcNDVI(samples[0]) - calcNDVI(samples[1]), //dates sorted descending
+					[-0.5, -0.2, 0, 0.2, 0.5], //thresholds; positive difference is greener
+					//colour ramp - one for each threshold
+					[
+					[1, 0, 0],
+					[0.5, 0, 0],
+					[0.5, 0.5, 0.5],
+					[0, 0.5, 0],
+					[0, 1, 0]
+					]);
+		}
 }
