@@ -24,7 +24,7 @@ function setup() {
 		output: { bands: 3 },
 		mosaicking: "ORBIT"
 	}
-}
+};
 
 //function to extract the two dates
 function preProcessScenes (collections) {	
@@ -34,35 +34,33 @@ function preProcessScenes (collections) {
 		return allowedDates.includes(orbitDateFrom);
 	})
 return collections
-}
+};
 
 //function to calculate NDVI
 function calcNDVI(sample) {
-	var NDVI = (sample.B08 - sample.B04) / (sample.B08 + sample.B04)
+	var NDVI = index(sample.B08, sample.B04)
 	return NDVI
-}
+};
+
+//function to calculate NDWI
+function calcNDWI(sample) {
+	var NDWI = index(sample.B03, sample.B08)
+	return NDWI
+};
 
 function evaluatePixel(samples){
 	//calculate and return dNDVI
-	var ndvi_diff = calcNDVI(samples[0]) - calcNDVI(samples[1]) //dates sorted descending
+	var ndvi_0 = calcNDVI(samples[0])
+	var ndvi_1 = calcNDVI(samples[1])
+	var ndvi_diff = ndvi_0 - ndvi_1 //dates sorted descending
 	
-	//water masks based on most recent observation
 	//water mask with NDWI
-	let NDWI = (samples[0].B03 - samples[0].B08) / (samples[0].B03 +
-samples[0].B08)
-/*	//water mask with FMI (https://www.mdpi.com/3195314)
-	let FMI = (samples[0].B04 - samples[0].B02) / (samples[0].B04 +
-samples[0].B02)
-*/
+	//let NDWI = (samples[0].B03 - samples[0].B08) / (samples[0].B03 + samples[0].B08);
 
-	if (NDWI>0.2){
+	if (calcNDWI(samples[0])>0.2 && calcNDWI(samples[1])>0.2){//Water mask pixels that were water during both periods
 		return [0,0,1]
 		}
-/*	else if (FMI>0){
-		return [0,0,1]
-		}
-*/
-	else{
+	else if (ndvi_1 >= 0.2){//Everything that was vegetation at the start
 		return valueInterpolate(ndvi_diff,
 							[-0.5, -0.2, 0, 0.2, 0.5], //thresholds; positive difference is greener
 							//colour ramp - one for each threshold
@@ -74,4 +72,7 @@ samples[0].B02)
 							[0, 1, 0]
 							]);
 		}
+	else{//This was not vegetation at the start
+		return [0,0,0];
+	}
 }
