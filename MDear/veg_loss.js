@@ -21,7 +21,7 @@ var allowedDates = ["2025-01-01", "2024-01-01"];
 function setup() {
 	return {
 		input: [{ bands: ["B02", "B03", "B04", "B08"] }],
-		output: { bands: 4 }, //need 3 RGB bands, plus transparency band 
+		output: { bands: 3 }, //need 3 RGB bands, plus transparency band 
 		mosaicking: "ORBIT"
 	}
 };
@@ -42,24 +42,31 @@ function calcNDVI(sample) {
 	return NDVI
 };
 
-function evaluatePixel(samples){	
-	if (calcNDWI(samples[0])>0.2 && calcNDWI(samples[1])>0.2){//Mask pixels that were water during both periods
-		return [0,0,1]
-		}
-	else if (calcNDVI(samples[0]) < 0.2 && calcNDVI(samples[1]) < 0.2){//Mask pixels that were non-vegetation during both periods
-		return [0,0,0];	
-	}
-	else{
-		return valueInterpolate(
-					calcNDVI(samples[0]) - calcNDVI(samples[1]), //dates sorted descending
-					[-0.5, -0.2, 0, 0.2, 0.5], //thresholds; positive difference is greener
+function evaluatePixel(samples){
+	let veg_thold = 0.5; // Threshold to identify vegetation in first period
+	let change_thold = -0.3; // Threshold to determine significant loss of vegetation
+	
+	if (calcNDVI(samples[1]) >= veg_thold){//Select pixels that were vegetation in the earliest period
+		let dNDVI = calcNDVI(samples[0]) - calcNDVI(samples[1]);
+		
+		if (dNDVI <= change_thold){
+			// Output coloured pixels
+			return valueInterpolate(
+					dNDVI, //dates sorted descending
+					[-0.5, -0.3], //thresholds; positive difference is greener
 					//colour ramp - one for each threshold
 					[
 					[1, 0, 0],
-					[0.5, 0, 0],
-					[0.5, 0.5, 0.5],
-					[0, 0.5, 0],
-					[0, 1, 0]
+					[0.5, 0, 0.5]
 					]);
 		}
+		else{
+			// return RGB
+			let factor = 1/2000;
+			return [factor*samples[0].B04,factor*samples[0].B03,factor*samples[0].B02];
+			}
+
+	}
+
+		
 }
