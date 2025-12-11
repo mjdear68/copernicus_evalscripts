@@ -43,30 +43,28 @@ function calcNDVI(sample) {
 };
 
 function evaluatePixel(samples){
-	let veg_thold = 0.5; // Threshold to identify vegetation in first period
+	let veg_thold = 0.4; // Threshold to identify vegetation in first period
 	let change_thold = -0.3; // Threshold to determine significant loss of vegetation
+	let dNDVI = calcNDVI(samples[0]) - calcNDVI(samples[1]);
 	
-	if (calcNDVI(samples[1]) >= veg_thold){//Select pixels that were vegetation in the earliest period
-		let dNDVI = calcNDVI(samples[0]) - calcNDVI(samples[1]);
-		
-		if (dNDVI <= change_thold){
-			// Output coloured pixels
-			return valueInterpolate(
-					dNDVI, //dates sorted descending
-					[-0.5, -0.3], //thresholds; positive difference is greener
-					//colour ramp - one for each threshold
-					[
-					[1, 0, 0],
-					[0.5, 0, 0.5]
-					]);
-		}
-		else{
-			// return RGB
-			let factor = 1/2000;
-			return [factor*samples[0].B04,factor*samples[0].B03,factor*samples[0].B02];
-			}
-
+	//Select pixels that were vegetation in the earliest period
+	// with dNDVI below the change threshold
+	if (calcNDVI(samples[1]) >= veg_thold && dNDVI <= change_thold){
+		// Output coloured pixels
+		return valueInterpolate(
+				dNDVI, //dates sorted descending
+				[1.5*change_thold, change_thold], 
+				//colour ramp - one for each threshold
+				[
+				[1, 0, 0],
+				[0.5, 0, 0.5]
+				]);
 	}
-
+	else{
+		// return RGB
+		//let factor = 2.5; //factor for single dates
+		let factor = 1/2000; //factor for quarterly mosaics
+		return [factor*samples[0].B04,factor*samples[0].B03,factor*samples[0].B02];
+	}
 		
 }
