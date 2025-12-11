@@ -42,14 +42,24 @@ function calcNDVI(sample) {
 	return NDVI
 };
 
+//function to calculate NDWI
+function calcNDWI(sample) {
+	var NDWI = index(sample.B03, sample.B08)
+	return NDWI
+};
+
 function evaluatePixel(samples){
 	let veg_thold = 0.4; // Threshold to identify vegetation in first period
 	let change_thold = -0.3; // Threshold to determine significant loss of vegetation
 	let dNDVI = calcNDVI(samples[0]) - calcNDVI(samples[1]);
 	
+	//Mask pixels that were water during both periods
+	if (calcNDWI(samples[0])>0.2 && calcNDWI(samples[1])>0.2){
+	return [0,0,1]
+	}
 	//Select pixels that were vegetation in the earliest period
 	// with dNDVI below the change threshold
-	if (calcNDVI(samples[1]) >= veg_thold && dNDVI <= change_thold){
+	else if (calcNDVI(samples[1]) >= veg_thold && dNDVI <= change_thold){
 		// Output coloured pixels
 		return valueInterpolate(
 				dNDVI, //dates sorted descending
