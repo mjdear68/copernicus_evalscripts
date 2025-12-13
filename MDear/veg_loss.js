@@ -19,11 +19,24 @@
 //Dates must exist for the given product for the range set in Copernicus Browser
 const DATES = ["2025-01-01", "2024-01-01"]; 
 
+// Threshold to identify vegetation in first period
+const veg_thold = 0.4; 
 
+// Threshold to determine significant loss of vegetation
+const change_thold = -0.3; 
+
+//Uncomment only one of the following lines
+//Uncomment this line for single dates
+//const factor = 2.5; 
+//Uncomment this line for quarterly mosaics
+const factor = 1/2000; 
+
+
+/****Begin main script***/
 function setup() {
 	return {
 		input: [{ bands: ["B02", "B03", "B04", "B08"] }],
-		output: { bands: 3 }, //need 3 RGB bands, plus transparency band 
+		output: { bands: 3 },
 		mosaicking: "ORBIT"
 	}
 };
@@ -32,7 +45,7 @@ function setup() {
 function preProcessScenes (collections) {	
 	collections.scenes.orbits = collections.scenes.orbits.filter(function
 	(orbit) {
-		var orbitDateFrom = orbit.dateFrom.split("T")[0];
+		let orbitDateFrom = orbit.dateFrom.split("T")[0];
 		return DATES.includes(orbitDateFrom);
 	})
 return collections
@@ -40,19 +53,18 @@ return collections
 
 //function to calculate NDVI
 function calcNDVI(sample) {
-	var NDVI = index(sample.B08, sample.B04)
+	let NDVI = index(sample.B08, sample.B04)
 	return NDVI
 };
 
 //function to calculate NDWI
 function calcNDWI(sample) {
-	var NDWI = index(sample.B03, sample.B08)
+	let NDWI = index(sample.B03, sample.B08)
 	return NDWI
 };
 
 function evaluatePixel(samples){
-	let veg_thold = 0.4; // Threshold to identify vegetation in first period
-	let change_thold = -0.3; // Threshold to determine significant loss of vegetation
+	//calculate NDVI difference
 	let dNDVI = calcNDVI(samples[0]) - calcNDVI(samples[1]);
 	
 	//Mask pixels that were water during both periods
@@ -74,8 +86,6 @@ function evaluatePixel(samples){
 	}
 	else{
 		// return RGB
-		//let factor = 2.5; //factor for single dates
-		let factor = 1/2000; //factor for quarterly mosaics
 		return [factor*samples[0].B04,factor*samples[0].B03,factor*samples[0].B02];
 	}
 		
