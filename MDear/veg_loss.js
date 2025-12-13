@@ -25,6 +25,9 @@ const veg_thold = 0.4;
 // Threshold to determine significant loss of vegetation
 const change_thold = -0.3; 
 
+//Threshold for water detection
+const water_thold = 0.4;
+
 //Uncomment only one of the following lines
 //Uncomment this line for single dates
 //const factor = 2.5; 
@@ -68,7 +71,7 @@ function evaluatePixel(samples){
 	let dNDVI = calcNDVI(samples[0]) - calcNDVI(samples[1]);
 	
 	//Mask pixels that were water during both periods
-	if (calcNDWI(samples[0])>0.2 && calcNDWI(samples[1])>0.2){
+	if (calcNDWI(samples[0]) >= water_thold && calcNDWI(samples[1]) >= water_thold){
 	return [0,0,1]
 	}
 	//Select pixels that were vegetation in the earliest period
