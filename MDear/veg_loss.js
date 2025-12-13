@@ -1,28 +1,34 @@
 //VERSION=3
 
-//Calculate the vegetation loss between two dates
-//Apply colour to output
-//Apply transparency for non-loss pixels
+/****About****/
+/*
+The purpose of this script is to use NDVI differencing for the identification of vegetation loss between two dates. 
 
-//Michael Dear, Dec 2025
+Author: Michael Dear, Dec 2025
 
-//Based on diff_NDVI, "Webinar - An Introduction to Working with Custom Scripts with the Sentinel Hub APIs in CDSE", 2025-10-04
-//https://youtu.be/7mkEVukGQ4o?si=VFfz4l_sjJYlSaxL
+Credits:
+This script is based on diff_NDVI from the CDSE webinar "An Introduction to Working with Custom Scripts with the Sentinel Hub APIs in CDSE", 2025-10-04
+https://youtu.be/7mkEVukGQ4o?si=VFfz4l_sjJYlSaxL
 
-//NOTES:
-//Requires the use of Time Range in Copernicus Browser
-//Can be used with S2 Quarterly Mosaics
+Usage
+1. Select either "Sentinel 2" or "Sentinel 2 Quarterly Mosaics" in the Data Collections panel
+2. Set a begin and end date that covers the required period using Time Range in Date panel
+3. Load the custom script either by providing a url or by pasting into the Custom Script panel
+4. Adjust the DATES constant and the thresholds to suit the project
+5. Select the correct factor for the data source
+6. Click Apply
+*/
 
 /****Global constants and variables****/
 //Begin and end dates
 //Order doesn't matter; output will be ordered descending
-//Dates must exist for the given product for the range set in Copernicus Browser
+//Dates must exist for the given product for the range set in the Copernicus Browser Date panel
 const DATES = ["2025-01-01", "2024-01-01"]; 
 
-// Threshold to identify vegetation in first period
+//Threshold to identify vegetation in first period
 const veg_thold = 0.4; 
 
-// Threshold to determine significant loss of vegetation
+//Threshold to determine significant loss of vegetation
 const change_thold = -0.3; 
 
 //Threshold for water detection
@@ -32,7 +38,7 @@ const water_thold = 0.4;
 //Uncomment this line for single dates
 //const factor = 2.5; 
 //Uncomment this line for quarterly mosaics
-const factor = 1/2000; 
+const FACTOR = 1/2000; 
 
 
 /****Begin main script***/
@@ -89,7 +95,7 @@ function evaluatePixel(samples){
 	}
 	else{
 		// return RGB
-		return [factor*samples[0].B04,factor*samples[0].B03,factor*samples[0].B02];
+		return [FACTOR*samples[0].B04,FACTOR*samples[0].B03,FACTOR*samples[0].B02];
 	}
 		
 }
