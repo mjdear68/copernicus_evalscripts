@@ -23,13 +23,13 @@ Usage
 //Begin and end dates
 //Order doesn't matter; output will be ordered descending
 //Dates must exist for the given product for the range set in the Copernicus Browser Date panel
-const DATES = ["2025-01-01", "2024-01-01"]; 
+const DATES = ["2020-01-01", "2019-01-01"]; 
 
 //Threshold to identify vegetation in first period
 const veg_thold = 0.4; 
 
-//Threshold to determine significant loss of vegetation
-const change_thold = -0.3; 
+//Threshold to determine significant vegetation change
+const change_thold = 0.3; 
 
 //Threshold for water detection
 const water_thold = 0.4;
@@ -82,16 +82,32 @@ function evaluatePixel(samples){
 	}
 	//Select pixels that were vegetation in the earliest period
 	// with dNDVI below the change threshold
-	else if (calcNDVI(samples[1]) >= veg_thold && dNDVI <= change_thold){
+	else if (calcNDVI(samples[1]) >= veg_thold && dNDVI <= -change_thold){
 		// Output coloured pixels
 		return valueInterpolate(
 				dNDVI, //dates sorted descending
-				[1.5*change_thold, change_thold], 
+				[-1.5*change_thold, -change_thold], 
 				//colour ramp - one for each threshold
 				[
 				[1, 0, 0],
 				[0.5, 0, 0.5]
 				]);
+	}
+	//Select pixels that were below vegetation threshold in the earliest period
+	// and above vegetation threshold in the second period
+	else if (calcNDVI(samples[0]) > veg_thold && calcNDVI(samples[1]) <= veg_thold){
+		// Output coloured pixels
+		return [0,1,0.25];
+		
+		/*valueInterpolate(
+				dNDVI,
+				[0.5*change_thold, 0.25*change_thold], 
+				//colour ramp - one for each threshold
+				[
+				[0, 1, 0],
+				[0, 0.5, 0.5]
+				]);
+				*/
 	}
 	else{
 		// return RGB
