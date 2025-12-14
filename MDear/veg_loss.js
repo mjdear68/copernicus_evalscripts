@@ -95,19 +95,16 @@ function evaluatePixel(samples){
 	}
 	//Select pixels that were below vegetation threshold in the earliest period
 	// and above vegetation threshold in the second period
-	else if (calcNDVI(samples[0]) > veg_thold && calcNDVI(samples[1]) <= veg_thold){
+	else if (calcNDVI(samples[1]) <= veg_thold && calcNDVI(samples[0]) > veg_thold){
 		// Output coloured pixels
-		return [0,1,0.25];
-		
-		/*valueInterpolate(
+		return valueInterpolate(
 				dNDVI,
-				[0.5*change_thold, 0.25*change_thold], 
+				[0.25*change_thold, 0.5*change_thold], 
 				//colour ramp - one for each threshold
 				[
 				[0, 1, 0],
-				[0, 0.5, 0.5]
-				]);
-				*/
+				[0, 0.5, 0.5],
+				]);	
 	}
 	else{
 		// return RGB
