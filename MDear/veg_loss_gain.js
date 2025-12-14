@@ -102,8 +102,8 @@ function evaluatePixel(samples){
 				[0.25*change_thold, 0.5*change_thold], 
 				//colour ramp - one for each threshold
 				[
-				[0, 1, 0],
-				[0, 0.5, 0.5],
+				[1, 1, 0.5],
+				[0, 1, 0.1],
 				]);	
 	}
 	else{
