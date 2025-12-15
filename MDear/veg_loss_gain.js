@@ -23,7 +23,7 @@ Usage
 //Begin and end dates
 //Order doesn't matter; output will be ordered descending
 //Dates must exist for the given product for the range set in the Copernicus Browser Date panel
-const DATES = ["2020-01-01", "2019-01-01"]; 
+const DATES = ["2025-01-01", "2019-01-01"]; 
 
 //Threshold to identify vegetation in first period
 const veg_thold = 0.4; 
@@ -40,6 +40,9 @@ const water_thold = 0.4;
 //Uncomment this line for quarterly mosaics
 const FACTOR = 1/2000; 
 
+//Toggle loss and gain on/off
+const loss_on = true;
+const gain_on = true;
 
 /****Begin main script***/
 function setup() {
@@ -48,7 +51,7 @@ function setup() {
 		output: { bands: 3 },
 		mosaicking: "ORBIT"
 	}
-};
+}
 
 //function to extract the two dates
 function preProcessScenes (collections) {	
@@ -58,31 +61,34 @@ function preProcessScenes (collections) {
 		return DATES.includes(orbitDateFrom);
 	})
 return collections
-};
+}
 
 //function to calculate NDVI
 function calcNDVI(sample) {
 	let NDVI = index(sample.B08, sample.B04)
 	return NDVI
-};
+}
 
 //function to calculate NDWI
 function calcNDWI(sample) {
 	let NDWI = index(sample.B03, sample.B08)
 	return NDWI
-};
+}
 
 function evaluatePixel(samples){
+    //calculate NDVI
+    let NDVI0 = calcNDVI(samples[0]);
+    let NDVI1 = calcNDVI(samples[1]);
+    
 	//calculate NDVI difference
-	let dNDVI = calcNDVI(samples[0]) - calcNDVI(samples[1]);
+	let dNDVI = NDVI0 - NDVI1;
 	
 	//Mask pixels that were water during both periods
 	if (calcNDWI(samples[0]) >= water_thold && calcNDWI(samples[1]) >= water_thold){
 	return [0,0,1]
 	}
-	//Select pixels that were vegetation in the earliest period
-	// with dNDVI below the change threshold
-	else if (calcNDVI(samples[1]) >= veg_thold && dNDVI <= -change_thold){
+	//Select pixels that had significant vegetation loss
+	else if (loss_on && NDVI1 >= veg_thold && dNDVI <= -change_thold){
 		// Output coloured pixels
 		return valueInterpolate(
 				dNDVI, //dates sorted descending
@@ -93,13 +99,12 @@ function evaluatePixel(samples){
 				[0.5, 0, 0.5]
 				]);
 	}
-	//Select pixels that were below vegetation threshold in the earliest period
-	// and above vegetation threshold in the second period
-	else if (calcNDVI(samples[1]) <= veg_thold && calcNDVI(samples[0]) > veg_thold){
+	//Select pixels that had significant vegetation gain
+	else if (gain_on && NDVI1 <= veg_thold && NDVI0 > veg_thold && dNDVI >= change_thold){
 		// Output coloured pixels
 		return valueInterpolate(
 				dNDVI,
-				[0.25*change_thold, 0.5*change_thold], 
+				[change_thold, 1.5*change_thold], 
 				//colour ramp - one for each threshold
 				[
 				[1, 1, 0.5],
@@ -107,7 +112,7 @@ function evaluatePixel(samples){
 				]);	
 	}
 	else{
-		// return RGB
+		// return RGB for remaining pixels
 		return [FACTOR*samples[0].B04,FACTOR*samples[0].B03,FACTOR*samples[0].B02];
 	}
 		
